@@ -7,14 +7,24 @@
 const express = require("express");
 const { Pool } = require("pg");
 
-const APP_VERSION = "1.2.0"; // change this, merge, and watch the pipeline take it live
+const APP_VERSION = "1.3.0"; // change this, merge, and watch the pipeline take it live
 const APP_ENV = process.env.APP_ENV ?? "development";
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set"); // crash at start
 
 // Creating a Pool does not connect yet: the first query does.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 3000,
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+  maxLifetimeSeconds: 300,
+  keepAlive: true,
+});
+
+// Discard idle clients that encounter a database connection error.
+// This prevents an idle connection failure from crashing the process.
+pool.on("error", (err) => {
+  console.error("Unexpected idle database client error:", err.message);
 });
 
 const app = express();
