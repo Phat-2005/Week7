@@ -1,0 +1,7 @@
+﻿node_modules/
+npm-debug.log
+
+# every local env file (.env, .env.cloud, ...) — but the example IS committed
+.env
+.env.*
+!.env.example
